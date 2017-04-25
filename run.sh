@@ -9,7 +9,7 @@ trandom="$(od -vAn -N4 -tu4 < /dev/urandom | tr -d '[:space:]')"
 
 ./runPythiaStarSim.sh $trandom
 
-mv pythia6.starsim.root starsim_${jobID}_${trandom}.root
-mv pythia6.starsim.fzd starsim_${jobID}_${trandom}.fzd
+mv pythia6.starsim.root starsim_${jobID}_${trandom}.GenTree.root
+mv pythia6.starsim.fzd starsim_${jobID}_${trandom}.GEANT.fzd
 
-./runBFC.sh starsim_${jobID}_${trandom}.fzd
+./runBFC.sh starsim_${jobID}_${trandom}.GEANT.fzd
