@@ -37,11 +37,8 @@ void trig( Int_t n=1 )
 {
   for ( Int_t i=0; i<n; i++ ) {
     chain->Clear();
-    
-    // Embbed 5 mu+ and 5 mu- in each event
-    // kinematics->Kine( 5, "mu-", 50.0, 50.1, -1.0, 1.0 );
-    // kinematics->Kine( 5, "mu+", 50.0, 50.1, -1.0, 1.0 );
-
+    kinematics->Kine( 10, "pi-", 0.9, 2.0, -0.8, 0.8 );
+    kinematics->Kine( 10, "pi+", 0.9, 2.0, -0.8, 0.8 );
     chain->Make();
   }
 }
@@ -72,7 +69,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2015b geant gstar agml usexgeom ";
+    TString simple = "y2014a geant gstar agml usexgeom ";
     bfc(0, simple );
   }
 
@@ -101,7 +98,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   //
   // Setup an event generator
   //
-  Pythia6( );
+  // Pythia6( );
 
   gSystem->Load( "libKinematics.so");
   kinematics = new StarKinematics();
@@ -137,7 +134,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   //   z = 0 gauss width = 30cm
   // 
   primary->SetVertex( 0., 0., 0. );
-  primary->SetSigma( 0.1, 0.1, 30.0 );
+  primary->SetSigma( 0.1, 0.1, 6.0 );
 
   //
   // Initialize primary event generator and all sub makers
@@ -147,9 +144,10 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   //
   // Setup geometry and set starsim to use agusread for input
   //
-  geometry("y2015b");
+  geometry("y2014a");
   command("gkine -4 0");
   command("gfile o pythia6.starsim.fzd");
+  command("geant/physics/dcay 0");
   
 
   // fPt = new TF1( "fPt", "exp(-[0] * 2)" );

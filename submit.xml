@@ -3,20 +3,23 @@
 	<stdout URL="file:/star/data03/pwg/jdb/scratch/log/log_$JOBID.log" />
 	<stderr URL="file:/star/data03/pwg/jdb/scratch/log/err_$JOBID.err" />
 
-	<output fromScratch="*.root" toURL="file:/star/data03/pwg/jdb/scratch/pythia/" />
-	<output fromScratch="*.fzd" toURL="file:/star/data03/pwg/jdb/scratch/pythia/" />
+	<output fromScratch="*FemtoDst.root" toURL="file:/star/data03/pwg/jdb/scratch/MtdSimGun/" />
+	<!-- <output fromScratch="*.fzd" toURL="file:/star/data03/pwg/jdb/scratch/MtdSimGun/" /> -->
 
 	<command>
-		starver SL16c
-		./run.sh $JOBID
+		starver pro
+		./run.sh pythia_$JOBID
 	</command>
 
 	<SandBox>
 		<Package>
+			<File>file:./StRoot</File>
+			<File>file:./.sl64_gcc482</File>
 			<File>file:./run.sh</File>
-			<File>file:./runPythiaStarSim.sh</File>
+			<File>file:./runStarSim.sh</File>
 			<File>file:./runBFC.sh</File>
 			<File>file:./starsim.C</File>
+			<File>file:./bfcRunner.C</File>
 		</Package> 
 	</SandBox>
 
