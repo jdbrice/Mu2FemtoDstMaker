@@ -8,7 +8,7 @@
 
 	<command>
 		starver pro
-		./run.sh pythia_$JOBID
+		./run.sh muon_$JOBID
 	</command>
 
 	<SandBox>

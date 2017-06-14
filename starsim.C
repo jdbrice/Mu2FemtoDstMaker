@@ -37,8 +37,8 @@ void trig( Int_t n=1 )
 {
   for ( Int_t i=0; i<n; i++ ) {
     chain->Clear();
-    kinematics->Kine( 10, "pi-", 0.9, 2.0, -0.8, 0.8 );
-    kinematics->Kine( 10, "pi+", 0.9, 2.0, -0.8, 0.8 );
+    kinematics->Kine( 50, "mu-", 0.9, 5.0, -0.5, 0.5 );
+    kinematics->Kine( 50, "mu+", 0.9, 5.0, -0.5, 0.5 );
     chain->Make();
   }
 }
@@ -147,7 +147,6 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   geometry("y2014a");
   command("gkine -4 0");
   command("gfile o pythia6.starsim.fzd");
-  command("geant/physics/dcay 0");
   
 
   // fPt = new TF1( "fPt", "exp(-[0] * 2)" );

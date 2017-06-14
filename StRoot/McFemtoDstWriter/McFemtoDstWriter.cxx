@@ -383,6 +383,7 @@ void McFemtoDstWriter::addMtdPidTraits( StTrackNode *node )
 	this->_fmtMtdPid.mMatchFlag         = mtdPid->matchFlag();
 	this->_fmtMtdPid.mDeltaTimeOfFlight = 0;
 	this->_fmtMtdPid.mMtdHitChan        = (hit->backleg() - 1) * 60 + (hit->module() - 1) * 12 + hit->cell();
+	this->_fmtMtdPid.mIdTruth           = hit->idTruth();
 
 	this->_fmtTrack.mMtdPidTraitsIndex = this->_fmtdw.N();
 
