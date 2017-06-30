@@ -9,6 +9,7 @@
 #include "StTrackGeometry.h"
 #include "StDcaGeometry.h"
 #include "StMtdPidTraits.h"
+#include "StBTofPidTraits.h"
 #include "StPhysicalHelixD.hh"
 #include "StEvent/StTrackNode.h"
 #include "StEvent/StGlobalTrack.h"
@@ -19,6 +20,7 @@
 
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcTrack.hh"
+#include "StMcEvent/StMcVertex.hh"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
@@ -38,6 +40,8 @@ int NCommonHits = 10;
 McFemtoDstWriter::McFemtoDstWriter( const Char_t *name ) : StMaker( name )
 {
 	this->_outputFilename = "FemtoDst.root";
+
+	SetDebug(1);
 }
 
 McFemtoDstWriter::~McFemtoDstWriter()
@@ -57,7 +61,9 @@ Int_t McFemtoDstWriter::Init()
 	_few.createBranch( this->_tree, "Event" );
 	_ftw.createBranch( this->_tree, "Tracks" );
 	_fmcw.createBranch( this->_tree, "McTracks" );
+	_fmcvertw.createBranch( this->_tree, "McVertices" );
 	_fmtdw.createBranch( this->_tree, "MtdPidTraits" );
+	_fbtofw.createBranch( this->_tree, "BTofPidTraits" );
 	this->_fhw.createBranch( this->_tree, "Helices" );
 
 
@@ -78,16 +84,23 @@ Int_t McFemtoDstWriter::Make()
 	
 	// Check that the DS are present
 	this->_StEvent = (StEvent*) GetInputDS("StEvent");
-	if (nullptr == this->_StEvent) 
+	if (nullptr == this->_StEvent) {
+		LOG_INFO << "No StEvent Found, cannot proceed" << endm;
 		return kStWarn;
+	}
 
 	this->_StMcEvent = (StMcEvent*) GetDataSet("StMcEvent");
-	if (nullptr == this->_StMcEvent) 
+	if (nullptr == this->_StMcEvent) {
+		LOG_INFO << "No StMcEvent Found, cannot proceed" << endm;
 		return kStWarn;
+	}
 
 	this->_StAssociationMaker = (StAssociationMaker*) GetMaker("StAssociationMaker");
-	if ( nullptr == this->_StAssociationMaker ) 
+	if ( nullptr == this->_StAssociationMaker ) {
+		LOG_INFO << "No StAssociationMaker Found, cannot proceed" << endm;
 		return kStWarn;
+	}
+
 
 
 	this->_rcTrackMap = this->_StAssociationMaker->rcTrackMap();
@@ -119,9 +132,11 @@ Int_t McFemtoDstWriter::Make()
 
 	// RESET containers
 	this->_fmcw.reset();
+	this->_fmcvertw.reset();
 	this->_ftw.reset();
 	this->_fhw.reset();
 	this->_fmtdw.reset();
+	this->_fbtofw.reset();
 
 	
 	StSPtrVecTrackNode &trackNodes = this->_StEvent->trackNodes();
@@ -130,13 +145,12 @@ Int_t McFemtoDstWriter::Make()
 	/*********************************************************/
 	// TRACKS
 	
-	this->_ftw.reset();
-	this->_fmtdw.reset();
 	for ( Int_t iTrack = 0; iTrack < nTracks; iTrack++ ){
 		StTrackNode *track = this->_StEvent->trackNodes()[ iTrack ];
 
 		this->_fmtTrack.reset();
 		addMtdPidTraits( track );
+		addBTofPidTraits( track );
 		addTrackHelix( track );
 		addTrack( track );
 	}
@@ -171,6 +185,18 @@ Int_t McFemtoDstWriter::Make()
 	}
 
 	// MCTRACKS
+	/*********************************************************/
+
+	/*********************************************************/
+	// MC Vertices
+	StSPtrVecMcVertex McVertices = this->_StMcEvent->vertices();
+	int nMcVertices = McVertices.size();
+	for ( int iMcVertex = 0; iMcVertex < nMcVertices; iMcVertex++ ){
+		StMcVertex *mcVertex = McVertices[ iMcVertex ];
+		addMcVertex( mcVertex );
+	}
+
+	// MC Vertices
 	/*********************************************************/
 
 	this->_tree->Fill();
@@ -221,6 +247,27 @@ int McFemtoDstWriter::getMatchedTrackIndex( StMcTrack * mcTrack ){
 	return rcIndex;
 }
 
+
+void McFemtoDstWriter::addMcVertex( StMcVertex *mcVertex ){
+
+	this->_fmtMcVertex.reset();
+	if ( nullptr == mcVertex ){
+		LOG_INFO << "WARN : null MC Vertex, skipping" << endm;
+	}
+	this->_fmtMcVertex.mId  = mcVertex->key() - 1;
+
+	this->_fmtMcVertex.mX = mcVertex->position().x();
+	this->_fmtMcVertex.mY = mcVertex->position().y();
+	this->_fmtMcVertex.mZ = mcVertex->position().z();
+	this->_fmtMcVertex.mGeantProcess = mcVertex->geantProcess();
+
+	if ( nullptr != mcVertex->parent() ){
+		this->_fmtMcVertex.mParentIndex = mcVertex->parent()->key() - 1;
+	}
+
+	this->_fmcvertw.add( this->_fmtMcVertex );
+}
+
 void McFemtoDstWriter::addMcTrack( StMcTrack *mcTrack, StTrack *rcTrack )
 {
 	if ( nullptr == mcTrack ){
@@ -246,6 +293,14 @@ void McFemtoDstWriter::addMcTrack( StMcTrack *mcTrack, StTrack *rcTrack )
 	if ( nullptr != mcParent ){
 		this->_fmtMcTrack.mParentIndex = mcParent->key() - 1; // key is indexed at 1
 	}
+
+	StMcVertex *startVertex = mcTrack->startVertex();
+	StMcVertex *stopVertex = mcTrack->stopVertex();
+
+	if (nullptr != startVertex)
+		this->_fmtMcTrack.mStartVertexIndex = startVertex->key() - 1;
+	if (nullptr != stopVertex)
+		this->_fmtMcTrack.mStopVertexIndex = stopVertex->key() - 1;
 
 
 	// If the MC track is matched to a RECO track
@@ -352,11 +407,12 @@ double McFemtoDstWriter::calculateDCA(StGlobalTrack *globalTrack, StThreeVectorF
 
 void McFemtoDstWriter::addMtdPidTraits( StTrackNode *node )
 {
+	LOG_INFO << "addMtdPidTraits(...)" << endm;
 	StTrack *track = node->track( primary );
 	if ( nullptr == track ) 
 		return;
 	StPtrVecTrackPidTraits traits = track->pidTraits(kMtdId);
-	if ( Debug() ) LOG_INFO << "MtdPidTraits size " << traits.size() << endm;
+	LOG_INFO << "MtdPidTraits size " << traits.size() << endm;
 	if ( traits.size() <= 0 )
 		return;
 
@@ -365,15 +421,16 @@ void McFemtoDstWriter::addMtdPidTraits( StTrackNode *node )
 		LOG_INFO << "WARN, null MtdPidTraits" << endm;
 	}
 
-	if ( Debug() ) {
-		LOG_INFO << "MC MtdHit? " << mtdPid->mtdHit()->idTruth() << endm;
-	 	LOG_INFO << "MC MtdHit? QA = " << mtdPid->mtdHit()->qaTruth() << endm;
+
 	
-		if ( mtdPid->mtdHit()->associatedTrack() ){
-			LOG_INFO << "MC MtdHit Track " << mtdPid->mtdHit()->associatedTrack()->key() << endm;
-			LOG_INFO << "this track keey = " << track->key() << endm;
-		}
+	LOG_INFO << "MC MtdHit? " << mtdPid->mtdHit()->idTruth() << endm;
+	LOG_INFO << "MC MtdHit? QA = " << mtdPid->mtdHit()->qaTruth() << endm;
+	
+	if ( mtdPid->mtdHit()->associatedTrack() ){
+		LOG_INFO << "MC MtdHit Track " << mtdPid->mtdHit()->associatedTrack()->key() << endm;
+		LOG_INFO << "this track keey = " << track->key() << endm;
 	}
+	
 
 	StMtdHit *hit = mtdPid->mtdHit();
 
@@ -383,10 +440,59 @@ void McFemtoDstWriter::addMtdPidTraits( StTrackNode *node )
 	this->_fmtMtdPid.mMatchFlag         = mtdPid->matchFlag();
 	this->_fmtMtdPid.mDeltaTimeOfFlight = 0;
 	this->_fmtMtdPid.mMtdHitChan        = (hit->backleg() - 1) * 60 + (hit->module() - 1) * 12 + hit->cell();
-	this->_fmtMtdPid.mIdTruth           = hit->idTruth();
+	this->_fmtMtdPid.mIdTruth           = hit->idTruth() - 1;	// minus one to index at 0
 
 	this->_fmtTrack.mMtdPidTraitsIndex = this->_fmtdw.N();
 
 	this->_fmtdw.add( this->_fmtMtdPid );
+
+}
+
+
+void McFemtoDstWriter::addBTofPidTraits( StTrackNode *node )
+{
+	
+
+	StTrack *track = node->track( primary );
+	if ( nullptr == track ) 
+		return;
+	StPtrVecTrackPidTraits traits = track->pidTraits(kTofId);
+	
+	if ( traits.size() <= 0 )
+		return;
+
+	StBTofPidTraits *btofPid = dynamic_cast<StBTofPidTraits*>(traits[0]);
+	if ( nullptr == btofPid ){
+		LOG_INFO << "WARN, null BTofPidTraits" << endm;
+		return;
+	}
+
+	if ( Debug() ) {
+		LOG_INFO << "MC BTofHit? " << btofPid->tofHit()->idTruth() << endm;
+	 	LOG_INFO << "MC BTofHit? QA = " << btofPid->tofHit()->qaTruth() << endm;
+	
+		if ( btofPid->tofHit()->associatedTrack() ){
+			LOG_INFO << "MC BTofHit Track " << btofPid->tofHit()->associatedTrack()->key() << endm;
+			LOG_INFO << "this track keey = " << track->key() << endm;
+		}
+	}
+
+	StBTofHit *hit = btofPid->tofHit();
+
+	this->_fmtBTofPid.reset();
+	this->_fmtBTofPid.yLocal (btofPid->yLocal() );
+	this->_fmtBTofPid.zLocal( btofPid->zLocal() );
+	this->_fmtBTofPid.matchFlag( btofPid->matchFlag() );
+	this->_fmtBTofPid.mIdTruth  =  btofPid->tofHit()->idTruth() - 1; // minus 1 to index at 0
+	
+	double b = btofPid->beta();
+	if ( b < 0 )
+		b = 0;
+	this->_fmtBTofPid.beta( b );
+
+
+	this->_fmtTrack.mBTofPidTraitsIndex = this->_fbtofw.N();
+
+	this->_fbtofw.add( this->_fmtBTofPid );
 
 }

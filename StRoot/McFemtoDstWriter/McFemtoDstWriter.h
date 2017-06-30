@@ -15,7 +15,9 @@
 #include "FemtoDstFormat/FemtoTrack.h"
 #include "FemtoDstFormat/FemtoTrackHelix.h"
 #include "FemtoDstFormat/FemtoMcTrack.h"
+#include "FemtoDstFormat/FemtoMcVertex.h"
 #include "FemtoDstFormat/FemtoMtdPidTraits.h"
+#include "FemtoDstFormat/FemtoBTofPidTraits.h"
 #include "FemtoDstFormat/BranchWriter.h"
 #include "FemtoDstFormat/TClonesArrayWriter.h"
 
@@ -48,24 +50,30 @@ protected:
 	void addTrack( StTrackNode * track );
 	void addTrackHelix( StTrackNode * track );
 	void addMcTrack( StMcTrack * mcTrack, StTrack *rcTrack );
+	void addMcVertex( StMcVertex * mcVertex );
 
 	void addMtdPidTraits( StTrackNode * track );
+	void addBTofPidTraits( StTrackNode * track );
 
 	TTree *_tree;
 	TFile *_rootFile;
 
-	FemtoEvent        _fmtEvent;
-	FemtoTrack        _fmtTrack;
-	FemtoTrackHelix   _fmtHelix;
-	FemtoMcTrack      _fmtMcTrack;
-	FemtoMtdPidTraits _fmtMtdPid;
+	FemtoEvent         _fmtEvent;
+	FemtoTrack         _fmtTrack;
+	FemtoTrackHelix    _fmtHelix;
+	FemtoMcTrack       _fmtMcTrack;
+	FemtoMcVertex      _fmtMcVertex;
+	FemtoMtdPidTraits  _fmtMtdPid;
+	FemtoBTofPidTraits _fmtBTofPid;
 
 // The Branch Writers
 #ifndef __CINT__	// gets confused by std::shared_ptr<>
 	BranchWriter<FemtoEvent> _few;
 	TClonesArrayWriter<FemtoTrack> _ftw;
 	TClonesArrayWriter<FemtoMcTrack> _fmcw;
+	TClonesArrayWriter<FemtoMcVertex> _fmcvertw;
 	TClonesArrayWriter<FemtoMtdPidTraits> _fmtdw;
+	TClonesArrayWriter<FemtoBTofPidTraits> _fbtofw;
 	TClonesArrayWriter<FemtoTrackHelix> _fhw;
 
 	StThreeVectorF      _pvPosition;

@@ -9,3 +9,4 @@ temp_gccflags.c
 *.consign
 *.cvsignore
 log
+log_*

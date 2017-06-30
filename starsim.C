@@ -37,8 +37,12 @@ void trig( Int_t n=1 )
 {
   for ( Int_t i=0; i<n; i++ ) {
     chain->Clear();
-    kinematics->Kine( 50, "mu-", 0.9, 5.0, -0.5, 0.5 );
-    kinematics->Kine( 50, "mu+", 0.9, 5.0, -0.5, 0.5 );
+    kinematics->Kine( 50, "pi-", 1.0, 1.5, -0.5, 0.5 );
+    kinematics->Kine( 50, "pi+", 1.0, 1.5, -0.5, 0.5 );
+
+    // kinematics->Kine( 10, "mu-", 1.0, 1.6, -0.5, 0.5 );
+    // kinematics->Kine( 10, "mu+", 1.0, 1.6, -0.5, 0.5 );
+
     chain->Make();
   }
 }
@@ -69,7 +73,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2014a geant gstar agml usexgeom ";
+    TString simple = "y2014a geant gstar agml usexgeom";
     bfc(0, simple );
   }
 
@@ -144,7 +148,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   //
   // Setup geometry and set starsim to use agusread for input
   //
-  geometry("y2014a");
+  geometry("y2014a field=-5.0");
   command("gkine -4 0");
   command("gfile o pythia6.starsim.fzd");
   
