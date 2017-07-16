@@ -7,3 +7,4 @@ $cd MtdSimGun
 $git submodule init  
 $git submodule update  
 $cons  
+$rm StRoot/FemtoDstFormat/LinkDef.h
