@@ -36,12 +36,13 @@ void command( TString cmd )
 void trig( Int_t n=1 )
 {
   for ( Int_t i=0; i<n; i++ ) {
-    chain->Clear();
-    kinematics->Kine( 50, "pi-", 1.0, 1.5, -0.5, 0.5 );
-    kinematics->Kine( 50, "pi+", 1.0, 1.5, -0.5, 0.5 );
+    chain->Clear(); 
+    
+    kinematics->Kine( 5, "mu-", 1.0, 10.0, -0.7, 0.7 );
+    kinematics->Kine( 6, "mu+", 1.0, 10.0, -0.7, 0.7 );
 
-    // kinematics->Kine( 10, "mu-", 1.0, 1.6, -0.5, 0.5 );
-    // kinematics->Kine( 10, "mu+", 1.0, 1.6, -0.5, 0.5 );
+    // kinematics->Kine( 50, "mu-", 1.0, 5.0, -0.7, 0.7 );
+    // kinematics->Kine( 50, "mu+", 1.0, 5.0, -0.7, 0.7 );
 
     chain->Make();
   }
@@ -73,7 +74,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2014a geant gstar agml usexgeom";
+    TString simple = "y2015c geant gstar agml usexgeom";
     bfc(0, simple );
   }
 
@@ -123,7 +124,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   // otherwise, particles outside of the specified range are cut.
   //
   //                    etamin etamax
-   primary->SetEtaRange( -0.7, +0.7 );
+   primary->SetEtaRange( -0.9, +0.9 );
   //
   //  phirange will be mapped into 0 to 2 pi internally.
   //
@@ -138,7 +139,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   //   z = 0 gauss width = 30cm
   // 
   primary->SetVertex( 0., 0., 0. );
-  primary->SetSigma( 0.1, 0.1, 6.0 );
+  primary->SetSigma( 0.1, 0.1, 35.0 );
 
   //
   // Initialize primary event generator and all sub makers
@@ -148,7 +149,7 @@ void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
   //
   // Setup geometry and set starsim to use agusread for input
   //
-  geometry("y2014a field=-5.0");
+  geometry("y2015c field=-5.0");
   command("gkine -4 0");
   command("gfile o pythia6.starsim.fzd");
   

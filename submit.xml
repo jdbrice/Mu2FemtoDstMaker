@@ -1,4 +1,4 @@
-<job  name="Pythia_StarSim_BFC"  simulateSubmission ="false" nProcesses="500" >
+<job  name="Pythia_StarSim_BFC"  simulateSubmission ="false" nProcesses="10000" >
 
 	<stdout URL="file:/star/data03/pwg/jdb/scratch/log/log_$JOBID.log" />
 	<stderr URL="file:/star/data03/pwg/jdb/scratch/log/err_$JOBID.err" />
@@ -7,8 +7,8 @@
 	<!-- <output fromScratch="*.fzd" toURL="file:/star/data03/pwg/jdb/scratch/MtdSimGun/" /> -->
 
 	<command>
-		starver SL15c
-		./run.sh pion_SL15c_$JOBID
+		starver SL16j
+		./run.sh Run15_pp200_SL16j_RFF_$JOBID
 	</command>
 
 	<SandBox>
