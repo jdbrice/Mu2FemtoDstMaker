@@ -3,23 +3,21 @@
 	<stdout URL="file:/star/data03/pwg/jdb/scratch/log/log_$JOBID.log" />
 	<stderr URL="file:/star/data03/pwg/jdb/scratch/log/err_$JOBID.err" />
 
-	<output fromScratch="*FemtoDst.root" toURL="file:/star/data03/pwg/jdb/scratch/MtdSimGun/" />
+	<output fromScratch="*FemtoDst.root" toURL="file:/star/data03/pwg/jdb/scratch/MinBiaspp200/" />
 	<!-- <output fromScratch="*.fzd" toURL="file:/star/data03/pwg/jdb/scratch/MtdSimGun/" /> -->
 
 	<command>
 		starver SL16j
-		./run.sh Run15_pp200_SL16j_RFF_$JOBID
+		root4star -b -q -l 'make.C( '"$FILELIST"' )'
+		./run.sh Run15_pp200_pions_SL16j_RFF_$JOBID
+
 	</command>
 
 	<SandBox>
 		<Package>
 			<File>file:./StRoot</File>
 			<File>file:./.sl64_gcc482</File>
-			<File>file:./run.sh</File>
-			<File>file:./runStarSim.sh</File>
-			<File>file:./runBFC.sh</File>
-			<File>file:./starsim.C</File>
-			<File>file:./bfcRunner.C</File>
+			<File>file:./make.C</File>
 		</Package> 
 	</SandBox>
 

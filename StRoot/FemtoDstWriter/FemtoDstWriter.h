@@ -1,11 +1,13 @@
-#ifndef MC_FEMTO_DST_WRITER_H
-#define MC_FEMTO_DST_WRITER_H
+#ifndef FEMTO_DST_WRITER_H
+#define FEMTO_DST_WRITER_H
 
 #include <string>
 
 // StRoot
 #include "StMaker.h"
-#include "StAssociationMaker/StAssociationMaker.h"
+#include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
+
 
 // ROOT
 #include "TTree.h"
@@ -14,8 +16,6 @@
 #include "FemtoDstFormat/FemtoEvent.h"
 #include "FemtoDstFormat/FemtoTrack.h"
 #include "FemtoDstFormat/FemtoTrackHelix.h"
-#include "FemtoDstFormat/FemtoMcTrack.h"
-#include "FemtoDstFormat/FemtoMcVertex.h"
 #include "FemtoDstFormat/FemtoMtdPidTraits.h"
 #include "FemtoDstFormat/FemtoBTofPidTraits.h"
 #include "FemtoDstFormat/BranchWriter.h"
@@ -23,17 +23,19 @@
 
 
 class StEvent;
+class StMuEvent;
 class StTrack;
 class StTrackNode;
-class StMcEvent;
-class StAssociationMaker;
-class StMcTrack;
+class StGlobalTrack;
+class StMuDst;
+class StMuTrack;
 
-class McFemtoDstWriter : public StMaker 
+
+class FemtoDstWriter : public StMaker 
 {
 public:
-	McFemtoDstWriter( const Char_t *name = "McFemtoDstWriter" );
-	~McFemtoDstWriter();
+	FemtoDstWriter( const Char_t *name = "FemtoDstWriter" );
+	~FemtoDstWriter();
 	
 	Int_t Init();
 	Int_t Make();
@@ -47,13 +49,13 @@ protected:
 
 	std::string _outputFilename;
 
-	void addTrack( StTrackNode * track );
-	void addTrackHelix( StTrackNode * track );
-	void addMcTrack( StMcTrack * mcTrack, StTrack *rcTrack );
-	void addMcVertex( StMcVertex * mcVertex );
+	void addTrack( StMuTrack * track );
+	// void addTrackHelix( StMuTrack * track );
+	// void addMcTrack( StMcTrack * mcTrack, StTrack *rcTrack );
+	// void addMcVertex( StMcVertex * mcVertex );
 
-	void addMtdPidTraits( StTrackNode * track );
-	void addBTofPidTraits( StTrackNode * track );
+	void addMtdPidTraits( StMuTrack * track );
+	void addBTofPidTraits( StMuTrack * track );
 
 	TTree *_tree;
 	TFile *_rootFile;
@@ -61,8 +63,6 @@ protected:
 	FemtoEvent         _fmtEvent;
 	FemtoTrack         _fmtTrack;
 	FemtoTrackHelix    _fmtHelix;
-	FemtoMcTrack       _fmtMcTrack;
-	FemtoMcVertex      _fmtMcVertex;
 	FemtoMtdPidTraits  _fmtMtdPid;
 	FemtoBTofPidTraits _fmtBTofPid;
 
@@ -70,26 +70,17 @@ protected:
 #ifndef __CINT__	// gets confused by std::shared_ptr<>
 	BranchWriter<FemtoEvent> _few;
 	TClonesArrayWriter<FemtoTrack> _ftw;
-	TClonesArrayWriter<FemtoMcTrack> _fmcw;
-	TClonesArrayWriter<FemtoMcVertex> _fmcvertw;
 	TClonesArrayWriter<FemtoMtdPidTraits> _fmtdw;
 	TClonesArrayWriter<FemtoBTofPidTraits> _fbtofw;
 	TClonesArrayWriter<FemtoTrackHelix> _fhw;
 
-	StThreeVectorF      _pvPosition;
+	StThreeVectorD     _pvPosition;
 #endif
 
 
 	StEvent            *_StEvent;
-	StMcEvent          *_StMcEvent;
-	StAssociationMaker *_StAssociationMaker;
-
-
-
-	rcTrackMapType     *_rcTrackMap = nullptr;
-	mcTrackMapType     *_mcTrackMap = nullptr;
-
-	int getMatchedTrackIndex( StMcTrack *mcTrack );
+	StMuEvent          *_StMuEvent;
+	StMuDst            *_StMuDst;
 
 	double calculateDCA(StGlobalTrack *globalTrack, StThreeVectorF vtxPos) const;
 
@@ -102,7 +93,7 @@ protected:
 	/***************************************************/
 
 
-	ClassDef(McFemtoDstWriter, 1)
+	ClassDef(FemtoDstWriter, 1)
 };
 
 
