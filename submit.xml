@@ -1,16 +1,16 @@
-<job  name="Pythia_StarSim_BFC"  simulateSubmission ="false" nProcesses="10000" >
+<job  name="MuDst2FemtoDst_Run15_pp200"  simulateSubmission ="false" maxFilesPerProcess="10" filesPerHour="15" >
 
 	<stdout URL="file:/star/data03/pwg/jdb/scratch/log/log_$JOBID.log" />
 	<stderr URL="file:/star/data03/pwg/jdb/scratch/log/err_$JOBID.err" />
 
 	<output fromScratch="*FemtoDst.root" toURL="file:/star/data03/pwg/jdb/scratch/MinBiaspp200/" />
-	<!-- <output fromScratch="*.fzd" toURL="file:/star/data03/pwg/jdb/scratch/MtdSimGun/" /> -->
+
+	<input URL="catalog:star.bnl.gov?trgsetupname=production_pp200long2_2015,filetype=daq_reco_MuDst,sname2=st_ssdmb,storage=local" nFiles="50000000" />
 
 	<command>
 		starver SL16j
-		root4star -b -q -l 'make.C( '"$FILELIST"' )'
-		./run.sh Run15_pp200_pions_SL16j_RFF_$JOBID
-
+		root4star -b -q -l 'make.C( "'$FILELIST'" )'
+		mv FemtoDst.root output_${JOBID}_FemtoDst.root
 	</command>
 
 	<SandBox>

@@ -101,6 +101,8 @@ Int_t FemtoDstWriter::Make()
 		LOG_INFO << "No StMuEvent Found, cannot proceed" << endm;
 		return kStWarn;
 	}
+
+
 	
 	
 
@@ -108,18 +110,25 @@ Int_t FemtoDstWriter::Make()
 	passTrigger |= this->_StMuEvent->triggerIdCollection().nominal().isTrigger( 490006 ); // VPDMB-5-nossd
 	passTrigger |= this->_StMuEvent->triggerIdCollection().nominal().isTrigger( 490904 ); // VPDMB-30
 
+
 	if ( false == passTrigger ){
-		LOG_INFO << "REJECT TRIGGER" << endm;
-		LOG_INFO << "=============" << endm;
-		for ( size_t i = 0; i < this->_StMuEvent->triggerIdCollection().nominal().triggerIds().size(); i++ ){
-			LOG_INFO  << "trigger : " << this->_StMuEvent->triggerIdCollection().nominal().triggerIds()[i] << endm;
-		}
+		// LOG_INFO << "REJECT TRIGGER" << endm;
+		// LOG_INFO << "=============" << endm;
+		// for ( size_t i = 0; i < this->_StMuEvent->triggerIdCollection().nominal().triggerIds().size(); i++ ){
+		// 	LOG_INFO  << "trigger : " << this->_StMuEvent->triggerIdCollection().nominal().triggerIds()[i] << endm;
+		// }
 		return kStOK;
 	}
 
+
+
 	// Fill Event Info
-	this->_fmtEvent.mRunId   = this->_StMuEvent->runId();
-	this->_fmtEvent.mEventId = this->_StMuEvent->eventId();
+	this->_fmtEvent.mRunId    = this->_StMuEvent->runId();
+	this->_fmtEvent.mEventId  = this->_StMuEvent->eventId();
+	this->_fmtEvent.mGRefMult = this->_StMuEvent->grefmult();
+	this->_fmtEvent.mPsi2     = this->_StMuEvent->refMult();
+
+
 
 	if ( nullptr == this->_StMuDst->primaryVertex() ){
 		LOG_INFO << "No Primary Vertex Found, skipping event" << endm;
@@ -128,12 +137,18 @@ Int_t FemtoDstWriter::Make()
 	this->_pvPosition = this->_StMuDst->primaryVertex()->position();
 	this->_fmtEvent.vertex( this->_pvPosition.x(), this->_pvPosition.y(), this->_pvPosition.z() );
 	
+
+	
+	// LOG_INFO << "vpdVz = " << this->_StMuDst->btofHeader() << endm;
+	// LOG_INFO << "vpdVz = " << (nullptr == this->_StMuDst->btofHeader() ) << endm;
+
 	if ( nullptr != this->_StMuDst->btofHeader ){
 		this->_fmtEvent.mWeight = this->_StMuDst->btofHeader()->vpdVz();
 		LOG_DEBUG << "vpdVz = " << this->_StMuDst->btofHeader()->vpdVz() << endm;
 	}
 	_few.set( this->_fmtEvent );
 
+	
 
 
 	// event cuts
@@ -143,6 +158,9 @@ Int_t FemtoDstWriter::Make()
 		return kStOK;
 	}
 
+	if ( this->_StMuDst->primaryVertex()->ranking() < 0 ){
+		return kStOK;
+	}
 	
 
 	

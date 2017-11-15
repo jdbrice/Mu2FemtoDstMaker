@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "ctype.h"
 
+
 // Forward the class declarations for StChain and St_db_Maker
 class     StChain;
 class     St_db_Maker;
@@ -14,8 +15,8 @@ void make( const Char_t * fileList = "./filelist.lis" ){
 	cout << "FileList: " << fileList << endl;
 	
 	// Maximums
-	Int_t nEvents = 50000000;
-	Int_t nfiles = 10;
+	Int_t nEvents = 500000000;
+	Int_t nfiles = 1;
 
 	StChain  *chain = 0;
 	St_db_Maker *dbMk = 0;
@@ -43,6 +44,7 @@ void make( const Char_t * fileList = "./filelist.lis" ){
  //  	muDstMaker->SetStatus("PrimaryVertices*",1);
  //  	muDstMaker->SetStatus("PrimaryTrack*",1);
  //  	muDstMaker->SetStatus("GlobalTrack*",1);
+ //  	// muDstMaker->SetStatus("MTD*",1);
  //  	muDstMaker->SetStatus("BTof*",1);
 
 
@@ -51,7 +53,7 @@ void make( const Char_t * fileList = "./filelist.lis" ){
 	// dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
 
 
-	McFemtoDstWriter *fmtWriter = new McFemtoDstWriter( "MtdMc");
+	FemtoDstWriter *fmtWriter = new FemtoDstWriter( "MtdMc");
 	fmtWriter->SetDebug(0);
 	fmtWriter->setOutputFileName( "FemtoDst.root" );
 
@@ -81,6 +83,9 @@ void make( const Char_t * fileList = "./filelist.lis" ){
 
 		// make the chain and get that status
 		istat = chain->Make(i);
+
+		if ( i % 500 == 0 )
+			cout << "." << std::flush;
 
 		if (istat == 2) {
 			cout << "Last event processed. Status = " << istat << endl;
